@@ -2,10 +2,7 @@
 using InventoryManagementSystem.Domain.Entities;
 using InventoryManagementSystem.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Moq;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace InventoryManagementSystem.Tests
