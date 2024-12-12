@@ -1,114 +1,86 @@
-﻿//using InventoryManagementSystem.Domain.Entities;
-////using InventoryManagementSystem.Infrastructure.Services;
-////using InventoryManagementSystem.Application.Exceptions;
-////using InventoryManagementSystem.Infrastructure.Repositories;
-//using Microsoft.AspNetCore.Authorization;
-//using Microsoft.AspNetCore.Mvc;
-//using InventoryManagementSystem.Constants;
-//using Microsoft.AspNetCore.Identity;
-//using System.ComponentModel.DataAnnotations;
+﻿using InventoryManagementSystem.Domain.Entities;
+using InventoryManagementSystem.Models;
+using InventoryManagementSystem.Services;
+using Microsoft.AspNetCore.Mvc;
 
-//namespace InventoryManagementSystem.Controllers
-//{
-//    [ApiController]
-//    [Route("api/[controller]")]
-//    public class UserController : ControllerBase
-//    {
-//        private readonly IUserRepository _userRepository;
-//        private readonly IPasswordHasher _passwordHasher;
-//        private readonly ITokenService _tokenService;
+namespace InventoryManagementSystem.Controllers;
 
-//        public UserController(IUserRepository userRepository, IPasswordHasher passwordHasher, ITokenService tokenService)
-//        {
-//            _userRepository = userRepository;
-//            _passwordHasher = passwordHasher;
-//            _tokenService = tokenService;
-//        }
+[ApiController]
+[Route("api/[controller]")]
+public class UsersController : ControllerBase
+{
+    private readonly UsersService _usersService;
 
-//        // POST /api/users/register
-//        [HttpPost("register")]
-//        public async Task<IActionResult> Register([FromBody] User user)
-//        {
-//            if (await _userRepository.ExistsByUsernameAsync(user.Username))
-//                throw new ValidationException("Username is already taken.");
+    public UsersController(UsersService usersService) =>
+        _usersService = usersService;
 
-//            if (await _userRepository.ExistsByEmailAsync(user.Email))
-//                throw new ValidationException("Email is already in use.");
+    [HttpGet]
+    public async Task<List<User>> GetAllUsersAsync() =>
+        await _usersService.GetAllUsersAsync();
 
-//            user.Password = _passwordHasher.HashPassword(user.Password);
-//            user.Role = UserRole.Viewer; // Default role
-//            await _userRepository.AddAsync(user);
+    [HttpGet("{id:length(1)}")]
+    public async Task<ActionResult<User>> GetUserByIdAsync(int id)
+    {
+        var user = await _usersService.GetUserByIdAsync(id);
 
-//            return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, user);
-//        }
+        if (user is null)
+        {
+            return NotFound();
+        }
 
-//        // POST /api/users/login
-//        [HttpPost("login")]
-//        public async Task<IActionResult> Login([FromBody] LoginRequest request)
-//        {
-//            var user = await _userRepository.GetByUsernameAsync(request.Username);
-//            if (user == null || !_passwordHasher.VerifyPassword(user.Password, request.Password))
-//                throw new UnauthorizedException("Invalid username or password.");
+        return user;
+    }
 
-//            var token = _tokenService.GenerateToken(user.Id.ToString(), user.Role.ToString());
-//            return Ok(new { Token = token });
-//        }
+    [HttpPost("register")]
+    public async Task<IActionResult> RegisterUserAsync(User newUser)
+    {
+        await _usersService.CreateUserAsync(newUser);
 
-//        // GET /api/users/{id} - Only accessible by Admin
-//        [HttpGet("{id}")]
-//        [Authorize(Roles = "Admin")]
-//        public async Task<IActionResult> GetUserById(int id)
-//        {
-//            var user = await _userRepository.GetByIdAsync(id);
-//            if (user == null)
-//                throw new NotFoundException("User not found.");
+        return CreatedAtAction(nameof(GetUserByIdAsync), new { id = newUser.Id }, newUser);
+    }
 
-//            return Ok(user);
-//        }
+    [HttpPost("login")]
+    public async Task<ActionResult<User>> LoginAsync([FromBody] LoginRequestModel request)
+    {
+        var user = await _usersService.LoginAsync(request.Email, request.Password);
 
-//        // GET /api/users - Only accessible by Admin
-//        [HttpGet]
-//        [Authorize(Roles = "Admin")]
-//        public async Task<IActionResult> GetAllUsers()
-//        {
-//            var users = await _userRepository.GetAllAsync();
-//            return Ok(users);
-//        }
+        if (user is null)
+        {
+            return Unauthorized("Invalid email or password.");
+        }
 
-//        // PUT /api/users/{id} - Only accessible by Admin
-//        [HttpPut("{id}")]
-//        [Authorize(Roles = "Admin")]
-//        public async Task<IActionResult> UpdateUser(int id, [FromBody] User updatedUser)
-//        {
-//            var user = await _userRepository.GetByIdAsync(id);
-//            if (user == null)
-//                throw new NotFoundException("User not found.");
+        return Ok(user);
+    }
 
-//            user.Username = updatedUser.Username ?? user.Username;
-//            user.Email = updatedUser.Email ?? user.Email;
-//            user.Role = updatedUser.Role;
+    [HttpPut("{id:length(1)}")]
+    public async Task<IActionResult> UpdateUserAsync(int id, User updatedUser)
+    {
+        var user = await _usersService.GetUserByIdAsync(id);
 
-//            await _userRepository.UpdateAsync(user);
-//            return NoContent();
-//        }
+        if (user is null)
+        {
+            return NotFound();
+        }
 
-//        // DELETE /api/users/{id} - Only accessible by Admin
-//        [HttpDelete("{id}")]
-//        [Authorize(Roles = "Admin")]
-//        public async Task<IActionResult> DeleteUser(int id)
-//        {
-//            var user = await _userRepository.GetByIdAsync(id);
-//            if (user == null)
-//                throw new NotFoundException("User not found.");
+        updatedUser.Id = user.Id;
 
-//            await _userRepository.DeleteAsync(user);
-//            return NoContent();
-//        }
-//    }
+        await _usersService.UpdateUserAsync(id, updatedUser);
 
-//    public class LoginRequest
-//    {
-//        public string Username { get; set; } = string.Empty;
-//        public string Password { get; set; } = string.Empty;
-//    }
-//}
+        return NoContent();
+    }
+
+    [HttpDelete("{id:length(1)}")]
+    public async Task<IActionResult> DeleteUserByIdAsync(int id)
+    {
+        var user = await _usersService.GetUserByIdAsync(id);
+
+        if (user is null)
+        {
+            return NotFound();
+        }
+
+        await _usersService.DeleteUserAsync(id);
+
+        return NoContent();
+    }
+}

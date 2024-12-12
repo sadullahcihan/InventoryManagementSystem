@@ -8,5 +8,6 @@
 
         public string ProductCollectionName { get; set; } = null!;
         public string CategoryCollectionName { get; set; } = null!;
+        public string UserCollectionName { get; set; } = null!;
     }
 }

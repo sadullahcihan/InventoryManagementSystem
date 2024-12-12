@@ -8,6 +8,7 @@ builder.Services.Configure<InventoryManagementSystemDatabaseSettings>(
     builder.Configuration.GetSection("InventoryManagementSystemDatabase"));
 builder.Services.AddSingleton<ProductsService>();
 builder.Services.AddSingleton<CategoriesService>();
+builder.Services.AddSingleton<UsersService>();
 
 // Other Services
 builder.Services.AddControllers()
