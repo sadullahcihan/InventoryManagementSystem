@@ -10,6 +10,9 @@ builder.Services.AddSingleton<ProductsService>();
 builder.Services.AddSingleton<CategoriesService>();
 builder.Services.AddSingleton<UsersService>();
 
+//logger
+builder.Services.AddLogging();
+
 // Other Services
 builder.Services.AddControllers()
     .AddJsonOptions(
