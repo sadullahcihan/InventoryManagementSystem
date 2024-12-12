@@ -25,6 +25,7 @@ namespace InventoryManagementSystem.Services
         // Yeni kullanıcı kaydı
         public async Task CreateUserAsync(User newUser)
         {
+            newUser.Password = BCrypt.Net.BCrypt.HashPassword(password);
             await _usersCollection.InsertOneAsync(newUser);
         }
 
