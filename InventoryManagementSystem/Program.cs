@@ -1,4 +1,4 @@
-using InventoryManagementSystem.Models;
+using InventoryManagementSystem.Infrastructures.Persistence;
 using InventoryManagementSystem.Services;
 
 var builder = WebApplication.CreateBuilder(args);

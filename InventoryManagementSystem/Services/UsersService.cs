@@ -1,5 +1,5 @@
 ﻿using InventoryManagementSystem.Domain.Entities;
-using InventoryManagementSystem.Models;
+using InventoryManagementSystem.Infrastructures.Persistence;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 

@@ -10,5 +10,13 @@ namespace InventoryManagementSystem.Domain.Entities
         public string Email { get; set; } = string.Empty;
         public UserRole Role { get; set; }
         public User() { }
+        public User(int id, string username, string password, string email, UserRole role)
+        {
+            Id = id;
+            Username = username;
+            Password = password;
+            Email = email;
+            Role = role;
+        }
     }
 }

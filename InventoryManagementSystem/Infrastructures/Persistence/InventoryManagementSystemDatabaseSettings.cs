@@ -1,4 +1,4 @@
-﻿namespace InventoryManagementSystem.Models
+﻿namespace InventoryManagementSystem.Infrastructures.Persistence
 {
     public class InventoryManagementSystemDatabaseSettings
     {
