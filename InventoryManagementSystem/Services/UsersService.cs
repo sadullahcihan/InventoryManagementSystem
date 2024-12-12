@@ -25,14 +25,26 @@ namespace InventoryManagementSystem.Services
         // Yeni kullanıcı kaydı
         public async Task CreateUserAsync(User newUser)
         {
-            newUser.Password = BCrypt.Net.BCrypt.HashPassword(password);
+            // Şifreyi hashleyin
+            newUser.Password = BCrypt.Net.BCrypt.HashPassword(newUser.Password);
+
+            // Yeni kullanıcıyı ekleyin
             await _usersCollection.InsertOneAsync(newUser);
         }
 
-        // Kullanıcı girişi (JWT token alma işlemi bu seviyede yapılmaz, ayrı bir servis önerilir)
+        // Kullanıcı girişi (şifre doğrulaması)
         public async Task<User?> LoginAsync(string email, string password)
         {
-            return await _usersCollection.Find(x => x.Email == email && x.Password == password).FirstOrDefaultAsync();
+            var user = await _usersCollection.Find(x => x.Email == email).FirstOrDefaultAsync();
+
+            if (user != null && BCrypt.Net.BCrypt.Verify(password, user.Password))
+            {
+                // Şifre doğruysa kullanıcıyı döndür
+                return user;
+            }
+
+            // Şifre yanlışsa null döndür
+            return null;
         }
 
         // Kullanıcı bilgilerini ID'ye göre getirme (Sadece Admin)
